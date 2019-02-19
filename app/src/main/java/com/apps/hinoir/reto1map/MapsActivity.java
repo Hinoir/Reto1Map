@@ -1,21 +1,25 @@
 package com.apps.hinoir.reto1map;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private static final int REQUEST_CODE = 11;
     private LocationManager manager;
@@ -48,10 +52,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+        }, REQUEST_CODE);
+
         // Add a marker in Cali and move the camera
         LatLng cali = new LatLng(3, -76);
         mMap.addMarker(new MarkerOptions().position(cali).title("Marker in Cali"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(cali));
+
+        //Agregar un listener para el marker
+        mMap.setOnMarkerClickListener(this);
 
         //Agregar un listener de ubicacion
         manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, new LocationListener() {
@@ -85,5 +97,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
 
+        // Retrieve the data from the marker
+        Integer clickCount = (Integer) marker.getTag();
+
+        if(clickCount != null){
+            clickCount = clickCount+1;
+            marker.setTag(clickCount);
+            Toast.makeText(this,
+                    marker.getTitle()+
+            " has been clicked "+
+            clickCount +
+            " times.",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+
+        return false;
+    }
 }
