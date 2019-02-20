@@ -2,6 +2,8 @@ package com.apps.hinoir.reto1map;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -19,7 +21,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+import java.io.IOException;
+import java.util.List;
+
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener, GoogleMap.OnMapClickListener {
 
     private static final int REQUEST_CODE = 11;
     private LocationManager manager;
@@ -64,6 +69,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //Agregar un listener para el marker
         mMap.setOnMarkerClickListener(this);
+        mMap.setOnMapClickListener(this);
+
+
+
+
 
         //Agregar un listener de ubicacion
         manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, new LocationListener() {
@@ -117,4 +127,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         return false;
     }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+        Geocoder geocoder = new Geocoder(MapsActivity.this);
+        List<Address> list;
+        try {
+            list = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException e){
+            return;
+        }
+        Address address = list.get(0);
+
+        MarkerOptions options = new MarkerOptions().title(address.getLocality())
+                .position(new LatLng(latLng.latitude,latLng.longitude));
+        mMap.addMarker(options);
+    }
+
+
 }
